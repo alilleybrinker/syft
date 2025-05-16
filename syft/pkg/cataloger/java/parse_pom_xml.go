@@ -119,6 +119,17 @@ func newPackageFromMavenPom(ctx context.Context, r *maven.Resolver, pom *maven.P
 	}
 	licenses := toPkgLicenses(ctx, &location, pomLicenses)
 
+	// grab SCM information if it's present.
+	var javaSCM *pkg.JavaScm = nil
+	if pom.SCM != nil && pom.SCM.URL != nil {
+		var scmURL = r.ResolveProperty(ctx, pom, pom.SCM.URL)
+		if len(scmURL) != 0 {
+			javaSCM = &pkg.JavaScm{
+				URL: scmURL,
+			}
+		}
+	}
+
 	m := pkg.JavaArchive{
 		PomProject: &pkg.JavaPomProject{
 			Parent:      javaPomParent,
@@ -128,6 +139,7 @@ func newPackageFromMavenPom(ctx context.Context, r *maven.Resolver, pom *maven.P
 			Name:        r.ResolveProperty(ctx, pom, pom.Name),
 			Description: r.ResolveProperty(ctx, pom, pom.Description),
 			URL:         r.ResolveProperty(ctx, pom, pom.URL),
+			SCM:         javaSCM,
 		},
 	}
 
@@ -215,6 +227,18 @@ func newPomProject(ctx context.Context, r *maven.Resolver, path string, pom *mav
 	projectURL := r.ResolveProperty(ctx, pom, pom.URL)
 
 	log.WithFields("path", path, "artifactID", id.ArtifactID, "name", name, "projectURL", projectURL).Trace("parsing pom.xml")
+
+	// grab SCM information if it's present.
+	var javaSCM *pkg.JavaScm = nil
+	if pom.SCM != nil && pom.SCM.URL != nil {
+		var scmURL = r.ResolveProperty(ctx, pom, pom.SCM.URL)
+		if len(scmURL) != 0 {
+			javaSCM = &pkg.JavaScm{
+				URL: scmURL,
+			}
+		}
+	}
+
 	return &pkg.JavaPomProject{
 		Path:        path,
 		Parent:      pomParent(ctx, r, pom),
@@ -224,6 +248,7 @@ func newPomProject(ctx context.Context, r *maven.Resolver, path string, pom *mav
 		Name:        name,
 		Description: cleanDescription(r.ResolveProperty(ctx, pom, pom.Description)),
 		URL:         projectURL,
+		SCM:         javaSCM,
 	}
 }
 
@@ -241,6 +266,18 @@ func newPackageFromDependency(ctx context.Context, r *maven.Resolver, pom *maven
 	if dependencyPom != nil {
 		depLicenses, _ := r.ResolveLicenses(ctx, dependencyPom)
 		licenses = append(licenses, toPkgLicenses(ctx, nil, depLicenses)...)
+
+		// grab SCM information if it's present.
+		var javaSCM *pkg.JavaScm = nil
+		if pom.SCM != nil && pom.SCM.URL != nil {
+			var scmURL = r.ResolveProperty(ctx, pom, pom.SCM.URL)
+			if len(scmURL) != 0 {
+				javaSCM = &pkg.JavaScm{
+					URL: scmURL,
+				}
+			}
+		}
+
 		pomProject = &pkg.JavaPomProject{
 			Parent:      pomParent(ctx, r, dependencyPom),
 			GroupID:     id.GroupID,
@@ -249,6 +286,7 @@ func newPackageFromDependency(ctx context.Context, r *maven.Resolver, pom *maven
 			Name:        r.ResolveProperty(ctx, pom, pom.Name),
 			Description: r.ResolveProperty(ctx, pom, pom.Description),
 			URL:         r.ResolveProperty(ctx, pom, pom.URL),
+			SCM:         javaSCM,
 		}
 	}
 

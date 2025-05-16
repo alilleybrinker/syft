@@ -123,6 +123,7 @@ type JavaPomProject struct {
 	Name        string         `json:"name"`
 	Description string         `json:"description,omitempty"`
 	URL         string         `json:"url,omitempty"`
+	SCM         *JavaScm       `json:"scm,omitempty"`
 }
 
 // JavaPomParent contains the fields within the <parent> tag in a pom.xml file
@@ -152,6 +153,10 @@ type unmarshalJavaManifest JavaManifest
 type legacyJavaManifest struct {
 	Main          map[string]string            `json:"main"`
 	NamedSections map[string]map[string]string `json:"namedSections"`
+}
+
+type JavaScm struct {
+	URL string `json:"url,omitempty"`
 }
 
 func (m *JavaManifest) UnmarshalJSON(b []byte) error {

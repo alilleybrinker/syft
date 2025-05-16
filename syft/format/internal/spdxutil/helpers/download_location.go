@@ -35,6 +35,10 @@ func DownloadLocation(p pkg.Package) string {
 			location = metadata.Dist.URL
 		case pkg.OpamPackage:
 			location = metadata.URL
+		case pkg.JavaArchive:
+			if metadata.PomProject != nil && metadata.PomProject.SCM != nil {
+				location = metadata.PomProject.SCM.URL
+			}
 		}
 	}
 	return URIValue(location)
